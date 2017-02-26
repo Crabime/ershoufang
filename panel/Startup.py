@@ -1,8 +1,10 @@
 from tkinter import *
 import Boot
-from threading import Thread
-from entity.info import getnewestinfo, getlastthreehoursinfo
+from threading import Thread, Timer
+from entity.info import getnewestinfo, getlastthreehoursinfo, get_domain
 from multiprocessing.pool import ThreadPool
+import random
+from panel.HyperLinkLabel import HyperLinkLabel
 
 class MainFrame(Frame):
     """
@@ -41,7 +43,7 @@ class MainFrame(Frame):
     def createWidgets(self):
         leftframe = Frame(self)
         self.labelvalue = StringVar()
-        self.source = Label(leftframe, textvariable=self.labelvalue, fg="red").grid(sticky=E)
+        self.source = Label(leftframe, textvariable=self.labelvalue, fg="red").grid(row=0, column=0, sticky=E)
         self.multiple_texts = Text(leftframe, height=20, highlightbackground="gray")
         self.scrollbar = Scrollbar(leftframe)
         self.multiple_texts.config(yscrollcommand=self.scrollbar.set)
@@ -60,20 +62,18 @@ class MainFrame(Frame):
         leftframe.grid(row=0, column=0)
 
     def createright(self):
-        '''构件右侧最近三小时房源信息面板'''
+        """构件右侧最近三小时房源信息面板"""
+
         rightframe = Frame(self)
-        self.righttop = Label(rightframe, text="最近5小时房源", fg="green")
-        self.righttop.grid(row=0, column=0)
         self.five_hours_sources = StringVar()
-        self.newestinfolabel = Message(rightframe, textvariable=self.five_hours_sources, justify=LEFT,
-                                       width=400, borderwidth=5)
-        self.newestinfolabel.grid(row=1, column=0, rowspan=2, pady=20, padx=100, sticky=NW)
+        self.newestinfolabel = LabelFrame(rightframe, text='最近五小时房源',borderwidth=5)
+        self.newestinfolabel.config(labelanchor=NW)
+        self.newestinfolabel.grid(row=1, column=0, rowspan=2)
         # 这里如何遍历该list对象,然后将它的信息依次显示在label上?
         newest_sources_within_five_hours = getlastthreehoursinfo()
-        wholetext = ""
         for i in newest_sources_within_five_hours:
-            wholetext = wholetext + i.description + " \n "
-        self.five_hours_sources.set(wholetext)
+            label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i))
+            label.pack()
         rightframe.grid(row=0, column=3)
 
 if __name__ == '__main__':

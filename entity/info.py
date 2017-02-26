@@ -155,6 +155,14 @@ def getlastthreehoursinfo():
     session.close()
     return sources
 
+def get_domain(entity):
+    domain = ""
+    session = createSession()
+    results = session.query(Website).filter(Website.id == entity.website_id).all()
+    domain = results[0].concrete_url + str(entity.url)
+    session.close()
+    return domain
+
 def reInitTable():
     drop_tables()
     create_tables()
