@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker
 import collections
 from utilities.Utilities import getsimilarityfactor
 from datetime import datetime, date, timedelta
-import time
 
 engine = create_engine("mysql+mysqldb://root:songshaoxian0520@localhost:3306/test?charset=utf8", convert_unicode=True)
 
@@ -107,7 +106,7 @@ def batchInsertInfo(info):
     validInfo = []
     if flag:
         session = createSession()
-        #去掉该集合中重复的部分
+        # 去掉该集合中重复的部分
         for i in info:
             url = getsimilarityfactor(i.url)
             result = session.query(Info).filter(Info.url.contains(url)).all()
@@ -141,7 +140,8 @@ def getnewestinfo():
     return result
 
 def getlastthreehoursinfo():
-    '''获取最近三小时的所有房源信息'''
+    """获取最近三小时的所有房源信息"""
+
     sources = list()
     session = createSession()
     # 这里datetime.time中需要传入一个datetime实例,datetime.today()方法返回当前时间点
@@ -156,12 +156,12 @@ def getlastthreehoursinfo():
     return sources
 
 def get_domain(entity):
-    domain = ""
     session = createSession()
     results = session.query(Website).filter(Website.id == entity.website_id).all()
-    domain = results[0].concrete_url + str(entity.url)
+    domain = results[0].domain + str(entity.url)
+    name = results[0].name
     session.close()
-    return domain
+    return domain, name
 
 def reInitTable():
     drop_tables()

@@ -2,6 +2,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 import smtplib
+from entity.info import getnewestinfo, get_domain
 
 
 class EmailHelper(object):
@@ -21,25 +22,33 @@ class EmailHelper(object):
         message['Subject'] = Header('%s' % ('开始搞事情'), 'gb2312')
         return message
 
-    def create_html(self, msg, *args):
+    def create_html(self, content, *args):
         """
         网页形式
 
-        msg:传入的信息
+        msg:邮件主题
+        content:要发送的邮件内容
         """
         message = MIMEMultipart("related")  # 作为消息的一个大容器,这个MIMEMultipart中第一个attach的MIMEMultipart必须为alternative类型的
         message['From'] = Header('Hello <%s>' % (self.from_addr), 'gb2312')
         message['To'] = Header('To <%s>' % (self.to_addr), 'gb2312')
-        message['Subject'] = Header('%s' % (msg), 'utf-8')
+        message['Subject'] = Header('来自%s最新房源消息' % (get_domain(content)[1]), 'utf-8')
         message.preamble = 'This is preamble of multipart message'
 
         # 讲plain(纯文本)、HTML格式的消息放到_subtype为"alternative"类型的消息体中
         # 这样消息代理就知道要展示那些内容了
         message_alternative = MIMEMultipart('alternative')
         message.attach(message_alternative)
-        message_text = MIMEText('纯文本格式的消息', 'plain', 'utf-8')
-        message_alternative.attach(message_text)
-        message_html = MIMEText('<h1>这里是HTML所指向的内容</h1>', 'html', 'utf-8')
+        html_message = '''<html>
+                            <body>
+                                <h1>最新房源</h1>
+                                <div><a href="{link}">{description}(点击查看)</a><p>价格: {price}万</p></div>
+                                <div><p style="color:red">位置:{location}</p><p>更新时间: {last_update}</p></div>
+                            </body>
+                        </html>'''.format(link=get_domain(content)[0], description=content.description, price=content.price, location=content.location, last_update=content.sourcetime)
+        print(get_domain(content)[0])
+        message_html = MIMEText(html_message, 'html', 'utf-8')
+
         message_alternative.attach(message_html)
         return message
 
@@ -54,5 +63,5 @@ if __name__ == '__main__':
     server = e.create_server()
     all_sendaddr = []
     all_sendaddr.append(e.to_addr)
-    # server.sendmail(e.from_addr, all_sendaddr, e.create_message('今天真冷啊').as_string())
-    server.sendmail(e.from_addr, all_sendaddr, e.create_html('今天真冷啊').as_string())
+    result = getnewestinfo().pop()
+    server.sendmail(e.from_addr, all_sendaddr, e.create_html(result).as_string())

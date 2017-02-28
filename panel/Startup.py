@@ -5,6 +5,7 @@ from entity.info import getnewestinfo, getlastthreehoursinfo, get_domain
 from multiprocessing.pool import ThreadPool
 import random
 from panel.HyperLinkLabel import HyperLinkLabel
+from utilities.emailhelper import EmailHelper
 
 class MainFrame(Frame):
     """
@@ -19,6 +20,10 @@ class MainFrame(Frame):
         self.pool = ThreadPool(processes=5)
         self.initpanel()
         self.grid()
+        self.email_sender = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
+        self.email_server = self.email_sender.create_server()
+        self.all_sendaddr = []
+        self.all_sendaddr.append(self.email_sender.to_addr)
         self.createWidgets()
         self.createright()
 
@@ -71,8 +76,11 @@ class MainFrame(Frame):
         self.newestinfolabel.grid(row=1, column=0, rowspan=2)
         # 这里如何遍历该list对象,然后将它的信息依次显示在label上?
         newest_sources_within_five_hours = getlastthreehoursinfo()
-        for i in newest_sources_within_five_hours:
-            label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i))
+        for index, i in enumerate(newest_sources_within_five_hours):
+            # 索引为1的发送,这里只是简单测试
+            if index == 1:
+                self.email_server.sendmail(self.email_sender.from_addr, self.all_sendaddr, self.email_sender.create_html(i).as_string())  # 这里可能会因为又见一次发送过多程序终止(MI:DMC)
+            label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i)[0])
             label.pack()
         rightframe.grid(row=0, column=3)
 

@@ -307,7 +307,7 @@
       </key>
       <foreign-key id="111" parent="20" name="emp_table_ibfk_1">
         <columns>manager_id</columns>
-        <ref-key>~.Users.PRIMARY</ref-key>
+        <ref-key>PRIMARY</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
