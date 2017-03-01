@@ -50,19 +50,20 @@ def sign(secret, parameters):
     #===========================================================================
     # 如果parameters 是字典类的话
     if hasattr(parameters, "items"):
-        keys = parameters.keys()
+        # keys = parameters.keys()  # 返回的是parameters的所有键的一个视图
+        keys = list(parameters.keys())
         keys.sort()
         
         parameters = "%s%s%s" % (secret,
             str().join('%s%s' % (key, parameters[key]) for key in keys),
             secret)
-    sign = hashlib.md5(parameters).hexdigest().upper()
+    sign = hashlib.md5(parameters.encode("utf8")).hexdigest().upper()
     return sign
 
 def mixStr(pstr):
-    if(isinstance(pstr, str)):
+    if(isinstance(pstr, bytes)):
         return pstr
-    elif(isinstance(pstr, unicode)):
+    elif(isinstance(pstr, str)):  # python3中将unicode类型该名为str
         return pstr.encode('utf-8')
     else:
         return str(pstr)
@@ -214,13 +215,13 @@ class RestApi(object):
         #=======================================================================
         # 获取response结果
         #=======================================================================
-        connection = httplib.HTTPConnection(self.__domain, self.__port, False, timeout)
+        connection = httplib.HTTPConnection(self.__domain, self.__port, timeout)
         sys_parameters = {
             P_FORMAT: 'json',
             P_APPKEY: self.__app_key,
             P_SIGN_METHOD: "md5",
             P_VERSION: '2.0',
-            P_TIMESTAMP: str(long(time.time() * 1000)),
+            P_TIMESTAMP: str(int(time.time() * 1000)),
             P_PARTNER_ID: SYSTEM_GENERATE_VERSION,
             P_API: self.getapiname(),
         }
@@ -244,24 +245,25 @@ class RestApi(object):
             body = str(form)
             header['Content-type'] = form.get_content_type()
         else:
-            body = urllib.urlencode(application_parameter)
+            body = urllib.parse.urlencode(application_parameter)  # ==》 python3中urllib.encode方法转移为urllib.parse.encode
             
-        url = N_REST + "?" + urllib.urlencode(sys_parameters)
+        url = N_REST + "?" + urllib.parse.urlencode(sys_parameters)
         connection.request(self.__httpmethod, url, body=body, headers=header)
         response = connection.getresponse();
         if response.status is not 200:
             raise RequestException('invalid http status ' + str(response.status) + ',detail body:' + response.read())
-        result = response.read()
+        result = response.read().decode("utf8")
         jsonobj = json.loads(result)
-        if jsonobj.has_key("error_response"):
+        # if jsonobj.has_key("error_response"):  # python3中并没有has_key方法,取而代之的是使用关键字in
+        if "error_response" in jsonobj:
             error = TopException()
-            if jsonobj["error_response"].has_key(P_CODE) :
+            if P_CODE in jsonobj["error_response"] :
                 error.errorcode = jsonobj["error_response"][P_CODE]
-            if jsonobj["error_response"].has_key(P_MSG) :
+            if P_MSG in jsonobj["error_response"] :
                 error.message = jsonobj["error_response"][P_MSG]
-            if jsonobj["error_response"].has_key(P_SUB_CODE) :
+            if P_SUB_CODE in jsonobj["error_response"] :
                 error.subcode = jsonobj["error_response"][P_SUB_CODE]
-            if jsonobj["error_response"].has_key(P_SUB_MSG) :
+            if P_SUB_MSG in jsonobj["error_response"] :
                 error.submsg = jsonobj["error_response"][P_SUB_MSG]
             error.application_host = response.getheader("Application-Host", "")
             error.service_host = response.getheader("Location-Host", "")
@@ -271,7 +273,7 @@ class RestApi(object):
     
     def getApplicationParameters(self):
         application_parameter = {}
-        for key, value in self.__dict__.iteritems():
+        for key, value in self.__dict__.items():
             if not key.startswith("__") and not key in self.getMultipartParas() and not key.startswith("_RestApi__") and value is not None :
                 if(key.startswith("_")):
                     application_parameter[key[1:]] = value
@@ -279,7 +281,7 @@ class RestApi(object):
                     application_parameter[key] = value
         #查询翻译字典来规避一些关键字属性
         translate_parameter = self.getTranslateParas()
-        for key, value in application_parameter.iteritems():
+        for key, value in application_parameter.items():
             if key in translate_parameter:
                 application_parameter[translate_parameter[key]] = application_parameter[key]
                 del application_parameter[key]
