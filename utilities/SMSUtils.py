@@ -29,9 +29,9 @@ class MessageSender(object):
         req.set_app_info(top.appinfo(self.__appkey, self.__appsecret))
 
         req.sms_type="normal"
-        req.sms_frewebsitee_sign_name="系统新消息"
-        # req.sms_param='{{"website":"{0}"}}'.format(self.website)
-        req.sms_param="{\"website\":\"58同城\"}"
+        req.sms_free_sign_name="系统新消息"
+        req.sms_param='{{"website":"{0}"}}'.format(self.website)
+        # req.sms_param='{\"website\":\"58同城\"}'
         req.rec_num="{0}".format(self.phone)
         req.sms_template_code="SMS_48035143"
         try:

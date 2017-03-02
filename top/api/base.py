@@ -233,7 +233,7 @@ class RestApi(object):
         sys_parameters[P_SIGN] = sign(self.__secret, sign_parameter)
         connection.connect()
         
-        header = self.get_request_header();
+        header = self.get_request_header()
         if(self.getMultipartParas()):
             form = MultiPartForm()
             for key, value in application_parameter.items():
@@ -252,7 +252,8 @@ class RestApi(object):
         response = connection.getresponse();
         if response.status is not 200:
             raise RequestException('invalid http status ' + str(response.status) + ',detail body:' + response.read())
-        result = response.read().decode("utf8")
+        result = response.read().decode("utf-8")
+        print(result)
         jsonobj = json.loads(result)
         # if jsonobj.has_key("error_response"):  # python3中并没有has_key方法,取而代之的是使用关键字in
         if "error_response" in jsonobj:
