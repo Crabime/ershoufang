@@ -6,6 +6,7 @@ from multiprocessing.pool import ThreadPool
 import random
 from panel.HyperLinkLabel import HyperLinkLabel
 from utilities.emailhelper import EmailHelper
+from panel.RefreshableLabelFrame import RefreshableLabelFrame
 
 class MainFrame(Frame):
     """
@@ -18,14 +19,19 @@ class MainFrame(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.pool = ThreadPool(processes=5)
-        self.initpanel()
+        # self.initpanel()
         self.grid()
         self.email_sender = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
         self.email_server = self.email_sender.create_server()
         self.all_sendaddr = []
         self.all_sendaddr.append(self.email_sender.to_addr)
-        self.createWidgets()
+        self.labels = []
+        # self.createWidgets()
+        self._newest_data = []
+        self._stop = False
         self.createright()
+        self.bottom_panel()
+        self.destroy_after_seconds(3)
 
     def say_hi(self):
         print("hi there, everyone!")
@@ -44,6 +50,41 @@ class MainFrame(Frame):
         async_result = self.pool.apply_async(getnewestinfo)
         returnval = async_result.get()
         return returnval
+
+    def destroy_after_seconds(self, time):
+        global INDEX
+        INDEX = INDEX + 1
+        print("执行了%3d次面板刷新" % (INDEX))
+        self.destroy_and_repaint()
+        timer = Timer(time, lambda :self.destroy_after_seconds(3))
+        if not self._stop:
+            timer.start()
+        else:
+            timer.cancel()
+
+    def destroy_and_repaint(self):
+        result = self.check_refreshdata()
+        if result:
+            for label in self.newestinfolabel.winfo_children():
+                label.destroy()
+            self.labels.clear()
+            newest_sources_within_five_hours = getlastthreehoursinfo()
+            for index, i in enumerate(newest_sources_within_five_hours):
+                # 索引为1的发送,这里只是简单测试
+                # if index == 1:
+                #     self.email_server.sendmail(self.email_sender.from_addr, self.all_sendaddr, self.email_sender.create_html(i).as_string())  # 这里可能会因为又见一次发送过多程序终止(MI:DMC)
+                label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i)[0])
+                self.labels.append(label)
+                label.pack()
+
+    def check_refreshdata(self):
+        """取当前数据库中的前三条数据面板上数据进行比对,不同则更新面板"""
+
+        result = False
+        data = getlastthreehoursinfo()[0]
+        if data.id != self._newest_data[0].id:
+            result = True
+        return result
 
     def createWidgets(self):
         leftframe = Frame(self)
@@ -67,7 +108,7 @@ class MainFrame(Frame):
         leftframe.grid(row=0, column=0)
 
     def createright(self):
-        """构件右侧最近三小时房源信息面板"""
+        """构建右侧最近三小时房源信息面板"""
 
         rightframe = Frame(self)
         self.five_hours_sources = StringVar()
@@ -75,19 +116,32 @@ class MainFrame(Frame):
         self.newestinfolabel.config(labelanchor=NW)
         self.newestinfolabel.grid(row=1, column=0, rowspan=2)
         # 这里如何遍历该list对象,然后将它的信息依次显示在label上?
-        newest_sources_within_five_hours = getlastthreehoursinfo()
+        self._newest_data = newest_sources_within_five_hours = getlastthreehoursinfo()
         for index, i in enumerate(newest_sources_within_five_hours):
             # 索引为1的发送,这里只是简单测试
-            if index == 1:
-                self.email_server.sendmail(self.email_sender.from_addr, self.all_sendaddr, self.email_sender.create_html(i).as_string())  # 这里可能会因为又见一次发送过多程序终止(MI:DMC)
+            # if index == 1:
+            #     self.email_server.sendmail(self.email_sender.from_addr, self.all_sendaddr, self.email_sender.create_html(i).as_string())  # 这里可能会因为又见一次发送过多程序终止(MI:DMC)
             label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i)[0])
+            self.labels.append(label)
             label.pack()
-        rightframe.grid(row=0, column=3)
+        rightframe.grid(row=0, column=0, columnspan=2)
+
+    def bottom_panel(self):
+        start = Button(self, text="开始", fg="blue", command=self.startCrawling)
+        start.grid(row=1, column=0)
+        exit = Button(self, text="结束", fg="red", command=root.destroy)
+        exit.grid(row=1, column=1)
+        exit.bind("<Button-1>", self.stop_procedure)
+
+    def stop_procedure(self, event):
+        self._stop = True
 
 if __name__ == '__main__':
+    INDEX = 0
     root = Tk()
     main = MainFrame(root)
     main.master.title('开始')
     main.master.wm_iconbitmap(bitmap=r'@crawler.xbm')  # 该段代码暂时还起不到作用
     main.master.minsize(400, 300)
+    main.lift()  # 将此窗口设置为模态
     main.mainloop()
