@@ -7,6 +7,7 @@ import random
 from panel.HyperLinkLabel import HyperLinkLabel
 from utilities.emailhelper import EmailHelper
 from panel.RefreshableLabelFrame import RefreshableLabelFrame
+from utilities.logger import MyLogger
 
 class MainFrame(Frame):
     """
@@ -21,6 +22,7 @@ class MainFrame(Frame):
         self.pool = ThreadPool(processes=5)
         # self.initpanel()
         self.grid()
+        self.init_logger()
         self.email_sender = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
         self.email_server = self.email_sender.create_server()
         self.all_sendaddr = []
@@ -33,8 +35,16 @@ class MainFrame(Frame):
         self.bottom_panel()
         self.destroy_after_seconds(3)
 
+    def init_logger(self):
+        # TODO 如何使用当前这种面向对象的方式进行初始化然后调用,当不会引起路径错误
+        _myLogger = MyLogger()
+        _myLogger.path = _myLogger.set_filename(name="Startup")
+        _myLogger.configlog()
+        self.myLogger = _myLogger
+
     def say_hi(self):
-        print("hi there, everyone!")
+        # print("hi there, everyone!")
+        self.myLogger.logger.info("hi there, everyone!")
 
     def initpanel(self):
         for r in range(7):
@@ -54,7 +64,8 @@ class MainFrame(Frame):
     def destroy_after_seconds(self, time):
         global INDEX
         INDEX = INDEX + 1
-        print("执行了%3d次面板刷新" % (INDEX))
+        # print("执行了%3d次面板刷新" % (INDEX))
+        self.myLogger.logger.info("执行了%3d次面板刷新" % (INDEX))
         self.destroy_and_repaint()
         timer = Timer(time, lambda :self.destroy_after_seconds(3))
         if not self._stop:

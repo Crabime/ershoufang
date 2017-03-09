@@ -1,3 +1,4 @@
+import os
 from time import sleep
 import random
 from datetime import datetime
@@ -7,13 +8,17 @@ from bs4 import BeautifulSoup
 import re
 from entity.info import Website, Info, insertWebsite, insertInfo, batchInsertInfo
 from utilities.Utilities import deletedomain, deleteallspecialcharacters, getvalidhref
-from crawler.yifangcrawler import crawyifang, getFourth
+from crawler.yifangcrawler import crawyifang, getFourth, init_yifanglogger
+from utilities.logger import MyLogger
 
 first = ""
 second = ""
 third = ""
 index = 0
 stop = False
+myLogger = None
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))  # 获取当前目录路径
+
 def crawl58(url):
     """
     :param url: 58同城爬取的url
@@ -25,7 +30,7 @@ def crawl58(url):
             四、及时处理网站更新问题,在这方面如何做一个动态配置
             五、优化匹配算法,现在这种全局匹配方式太落后,准确度几乎为0(已优化)
     """
-    print("\n\n===========来自58的房源==============")
+    myLogger.logger.info("\n\n===========来自58的房源==============")
     r = requests.get(url)
     contents = BeautifulSoup(r.content, "html.parser")  # 获取到该网页的地址
 
@@ -39,7 +44,7 @@ def crawl58(url):
         desc = deleteallspecialcharacters(a.text)
         left = e.find("div", class_="qj-listleft")
         position = left.a.text
-        print("URL:", a["href"], " 描述: ", desc, end="\t")  # 这里使用a.string与a.text作用都是一样的
+        myLogger.logger.info("URL:" + a["href"] +  "描述: " + desc)
         right = e.find("div", class_="qj-listright")
         price = right.b.text
         dealingtime = currentTime()
@@ -50,14 +55,14 @@ def crawl58(url):
             price = int(price)
         except:
             price = 0
-        print("价格:", right.b.text)
+        myLogger.logger.info("价格:" + right.b.text)
         info = Info(description=desc, url=deletedomain(a["href"]), price=price, website_id=1, time=dealingtime, sourcetime=sourcetime, location=position)
         # 为什么数据库只是执行一条数据的插入???这里暂且先放到一个list集合中
         infoList.append(info)
     batchInsertInfo(infoList)
 
 def crawGanji(url):
-    print("\n\n===========来自赶集网的房源==============")
+    myLogger.logger.info("\n\n===========来自赶集网的房源==============")
     r = requests.get(url)
     contents = BeautifulSoup(r.content, "html.parser")  # 获取到该网页的地址
     all = contents.find_all("div", class_="ershoufang-list")
@@ -73,13 +78,13 @@ def crawGanji(url):
         url = getvalidhref(ele["href"])
         price = e.find("dd", class_="info").find("div", class_="price").find("span", class_="js-price").text
         location = deleteallspecialcharacters(e.find("dd", class_="address").find("span", class_="area").text).replace("徐东二手房出售", "")
-        print(description, " ,url: ", url, "价格: ", price, " 位置:", location)
+        myLogger.logger.info(description + " ,url: " + url, "价格: " + price, " 位置:" + location)
         info = Info(description=description, url=url, price=price, website_id=2, time=currentTime(), location=location)
         infoList.append(info)
     batchInsertInfo(infoList)
 
 def crawSouFang(url):
-    print("\n\n===========来自搜房网的房源==============")
+    myLogger.logger.info("\n\n===========来自搜房网的房源==============")
     r = requests.get(url)
     contents = BeautifulSoup(r.content, "html.parser")  # 获取到该网页的地址
     parent = contents.find("div", class_="build_list")
@@ -96,8 +101,8 @@ def crawSouFang(url):
     third_one = deleteallspecialcharacters(allCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
     third_two = deleteallspecialcharacters(allNonCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
     third = [third_one, third_two]
-    print("推广房源数量:" , len(allCommercialHouses), "个人非推广房源数目:" , len(allNonCommercialHouses))
-    print("\t\t=========下面是所有搜房网推广个人房源=============")
+    myLogger.logger.info("推广房源数量:" + str(len(allCommercialHouses)) + "个人非推广房源数目:" + str(len(allNonCommercialHouses)))
+    myLogger.logger.info("\t\t=========下面是所有搜房网推广个人房源=============")
     # 下面时所有的推广的房源
     for a in allCommercialHouses:
         basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
@@ -106,11 +111,11 @@ def crawSouFang(url):
         url = basic["href"]
         price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
         position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
-        print(description, " , url :", url, " ,price :", price, " ,位置 :", position)
+        myLogger.logger.info(description + " , url :" + url, " ,price :" + price + " ,位置 :" + position)
         info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
         infoList.append(info)
 
-    print("\t\t=========下面是所有非推广个人房源=============")
+    myLogger.logger.info("\t\t=========下面是所有非推广个人房源=============")
     # 下面时所有非推广的个人房源
     for a in allNonCommercialHouses:
         basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
@@ -119,7 +124,7 @@ def crawSouFang(url):
         # 这里getDomain还未完善
         url = basic["href"]
         price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
-        print(description, " , url :", url, " ,price :", price, " ,location :", position)
+        myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,location :" + position)
         info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
         infoList.append(info)
     batchInsertInfo(infoList)
@@ -131,7 +136,7 @@ def getFirst(url):
     currentFirst = tds[0].find("a").text
     # 这里就是重新爬一次,然后比较它的第一个字符串与之前放在全局的first变量进行比较
     if currentFirst.strip()[:3] == first.strip()[:3]:
-        print("58同城没有刷新")
+        myLogger.logger.info("58同城没有刷新")
         return True  # 该网站并未刷新
     else: return False
 
@@ -141,7 +146,7 @@ def getSecond(url):
     all = contents.find_all("div", class_="ershoufang-list")
     currentSecond = all[0].find("dd", class_="title").find("a").text
     if currentSecond.strip()[:3] == second.strip()[:3]:
-        print("赶集网没有刷新")
+        myLogger.logger.info("赶集网没有刷新")
         return True
     else: return False
 
@@ -157,9 +162,10 @@ def getThird(url):
     # 查找div的下一个dl元素,针对bs4
     currentThirdTwo = deleteallspecialcharacters(commercial.find_next_sibling('dl').find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
     if currentThirdOne.strip()[:3] != third[0].strip()[:3] or currentThirdTwo.strip()[:3] != third[1].strip()[:3]:
+        myLogger.logger.warning("搜房网刷新了")
         return False
     else:
-        print("搜房网没有刷新")
+        myLogger.logger.info("搜房网没有刷新")
         return True
 
 # 获取当前时间,与上一次时间做比对
@@ -177,7 +183,7 @@ def commonCrawling(url):
 def comparePrevious():
     # 如果第一行为空,那么说明程序刚刚启动,应该爬全页
     if first == "":
-        print("first variable has not been assigned")
+        myLogger.logger.info("first variable has not been assigned")
         return True
 
 def getDomain(url):
@@ -193,11 +199,19 @@ def getDomain(url):
 def initAndStoreWebsite(websites):
     insertWebsite(websites)
 
+def init_logger():
+    global myLogger
+    myLogger = MyLogger()
+    myLogger.path = myLogger.set_filename(name="Boot")
+    myLogger.configlog()
+
 def main():
     url = "http://wh.58.com/wuchang/ershoufang/h2/?PGTID=0d30000c-0000-1c80-3da0-dc1fb858affb&ClickID=5"
     ganjiurl = "http://wh.ganji.com/fang5/xudong/a1/"
     soufangurl = "http://wh.sofang.com/esfsale/area/aa879-ab1949"
     yifangurl = "http://oldhouse.wh.fdc.com.cn/house-a006/z21"
+    init_logger()
+    init_yifanglogger()
     currentTime()
     global stop
     global index

@@ -11,3 +11,4 @@ top/api/__pycache__/
 top/api/rest/__pycache__/
 utilities/__pycache__/
 test/
+logs/
