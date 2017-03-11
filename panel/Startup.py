@@ -36,7 +36,6 @@ class MainFrame(Frame):
         self.destroy_after_seconds(3)
 
     def init_logger(self):
-        # TODO 如何使用当前这种面向对象的方式进行初始化然后调用,当不会引起路径错误
         _myLogger = MyLogger()
         _myLogger.path = _myLogger.set_filename(name="Startup")
         _myLogger.configlog()

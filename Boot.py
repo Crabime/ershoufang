@@ -78,7 +78,7 @@ def crawGanji(url):
         url = getvalidhref(ele["href"])
         price = e.find("dd", class_="info").find("div", class_="price").find("span", class_="js-price").text
         location = deleteallspecialcharacters(e.find("dd", class_="address").find("span", class_="area").text).replace("徐东二手房出售", "")
-        myLogger.logger.info(description + " ,url: " + url, "价格: " + price, " 位置:" + location)
+        myLogger.logger.info(description + " ,url: " + url + "价格: " + price + " 位置:" + location)
         info = Info(description=description, url=url, price=price, website_id=2, time=currentTime(), location=location)
         infoList.append(info)
     batchInsertInfo(infoList)
@@ -111,7 +111,7 @@ def crawSouFang(url):
         url = basic["href"]
         price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
         position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
-        myLogger.logger.info(description + " , url :" + url, " ,price :" + price + " ,位置 :" + position)
+        myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,位置 :" + position)
         info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
         infoList.append(info)
 

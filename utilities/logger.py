@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 import os
+from Constants import ROOT_PATH
 
 class MyLogger(object):
 
@@ -29,11 +30,7 @@ class MyLogger(object):
     def path(self, name=None):
         """set logger file name, if you don't specify its name log named with current time will be used"""
 
-        cur_file = os.path.basename(__file__)
-        print(cur_file)
-        parent_file = os.path.abspath(os.path.join(cur_file, os.pardir))
-        print("caller为:" + self.logger.findCaller()[0])
-        self._path = parent_file + "/logs/" + (self.logger.findCaller()[0] if name == None or name.replace(" ", "") == "" else name)
+        self._path = ROOT_PATH + "/logs/" + (self.logger.findCaller()[0] if name == None or name.replace(" ", "") == "" else name)
         print(self._path)
 
 
