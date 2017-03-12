@@ -1,12 +1,19 @@
 import top.api
 import json
+import configparser
+import Constants
 
 class MessageSender(object):
     def __init__(self, website, phone):
         self.__website = website
         self.__phone = phone
-        self.__appkey = "23642933"
-        self.__appsecret = "e3539164ac2bcb43d3a34654a4a5e5e7"
+        self.init_key()
+
+    def init_key(self):
+        config = configparser.ConfigParser()
+        config.read(Constants.ROOT_PATH + "/admin.ini")
+        self.__appkey = config['sms']['sms_key']
+        self.__appsecret = config['sms']['sms_secret']
 
     @property
     def website(self):

@@ -23,7 +23,7 @@ class MainFrame(Frame):
         # self.initpanel()
         self.grid()
         self.init_logger()
-        self.email_sender = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
+        self.email_sender = EmailHelper("smtp.163.com")
         self.email_server = self.email_sender.create_server()
         self.all_sendaddr = []
         self.all_sendaddr.append(self.email_sender.to_addr)
@@ -42,7 +42,6 @@ class MainFrame(Frame):
         self.myLogger = _myLogger
 
     def say_hi(self):
-        # print("hi there, everyone!")
         self.myLogger.logger.info("hi there, everyone!")
 
     def initpanel(self):

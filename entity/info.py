@@ -5,8 +5,12 @@ from sqlalchemy.orm import sessionmaker
 import collections
 from utilities.Utilities import getsimilarityfactor
 from datetime import datetime, date, timedelta
+import configparser
+import Constants
 
-engine = create_engine("mysql+mysqldb://root:xian6875252@localhost:3306/test?charset=utf8", convert_unicode=True)
+config = configparser.ConfigParser()
+config.read(Constants.ROOT_PATH + "/admin.ini")
+engine = create_engine("mysql+mysqldb://{0}:{1}@localhost:3306/test?charset=utf8".format(config['database']['username'],config['database']['password']), convert_unicode=True)
 
 Base = declarative_base()
 

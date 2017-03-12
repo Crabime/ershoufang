@@ -10,7 +10,7 @@ class HyperLinkLabel(Label):
         self.bind("<Button-1>", self.click_callback)
         self.bind("<Enter>", self.click_callback)
         self.bind("<Leave>", self.click_callback)
-        self.config(cursor="arrow")
+        self.config(cursor="hand2")  # windows下能使用hand
 
     @property
     def link(self):
