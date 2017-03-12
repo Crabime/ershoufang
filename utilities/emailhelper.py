@@ -3,17 +3,26 @@ from email.mime.multipart import MIMEMultipart
 from email.header import Header
 import smtplib
 from entity.info import getnewestinfo, get_domain
+import Constants
+import configparser
 
 
 class EmailHelper(object):
 
-    def __init__(self, from_addr=None, to_addr=None, password=None, smtp_server=None, port=0):
+    def __init__(self, smtp_server=None, port=0):
         super().__init__()
-        self.from_addr = from_addr
-        self.to_addr = to_addr
-        self.password = password
+        self.init_necessary()
+        self.from_addr = self.emailName
+        self.to_addr = self.emailName
+        self.password = self.emaiPass
         self.smtp_server = smtp_server
         self.port = port
+
+    def init_necessary(self):
+        config = configparser.ConfigParser()
+        config.read(Constants.ROOT_PATH + "/admin.ini")
+        self.emailName = config['email']['email_account']
+        self.emaiPass = config['email']['email_password']
 
     def create_message(self, msg):
         message = MIMEText(msg, 'plain', 'gb2312')
@@ -59,7 +68,7 @@ class EmailHelper(object):
         return server
 
 if __name__ == '__main__':
-    e = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
+    e = EmailHelper("smtp.163.com")
     server = e.create_server()
     all_sendaddr = []
     all_sendaddr.append(e.to_addr)
