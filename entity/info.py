@@ -6,7 +6,7 @@ import collections
 from utilities.Utilities import getsimilarityfactor
 from datetime import datetime, date, timedelta
 
-engine = create_engine("mysql+mysqldb://root:songshaoxian0520@localhost:3306/test?charset=utf8", convert_unicode=True)
+engine = create_engine("mysql+mysqldb://root:xian6875252@localhost:3306/test?charset=utf8", convert_unicode=True)
 
 Base = declarative_base()
 

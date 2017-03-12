@@ -105,7 +105,7 @@ class MainFrame(Frame):
         self.multiple_texts.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.multiple_texts.yview)
         #这里如果直接开启Boot中main方法会一只阻塞主线程,这里创建一个新的线程
-        self.start = Button(leftframe, text="开始", fg="blue", command=self.say_hi).grid(row=1, column=1, columnspan=2, rowspan=2, sticky=W)
+        self.start = Button(leftframe, text="开始", fg="blue", command=self.startCrawling).grid(row=1, column=1, columnspan=2, rowspan=2, sticky=W)
         self.exit = Button(leftframe, text="结束", fg="red", command=root.destroy).grid(row=1, column=1, columnspan=2, rowspan=2, padx=1)
         #这里设置label的值
         self.labelvalue.set("最新房源")
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     root = Tk()
     main = MainFrame(root)
     main.master.title('开始')
-    main.master.wm_iconbitmap(bitmap=r'@crawler.xbm')  # 该段代码暂时还起不到作用
+    # main.master.wm_iconbitmap(bitmap=r'@crawler.xbm')  # 该段代码暂时还起不到作用
     main.master.minsize(400, 300)
     main.lift()  # 将此窗口设置为模态
     main.mainloop()
