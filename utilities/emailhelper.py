@@ -59,7 +59,7 @@ class EmailHelper(object):
         return server
 
 if __name__ == '__main__':
-    e = EmailHelper("crabime@163.com", "crabime@163.com", "xian6875252", "smtp.163.com")
+    e = EmailHelper("crabime@163.com", "crabime@163.com", "xxx", "smtp.163.com")
     server = e.create_server()
     all_sendaddr = []
     all_sendaddr.append(e.to_addr)
