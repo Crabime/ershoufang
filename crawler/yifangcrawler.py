@@ -4,6 +4,9 @@ from utilities.Utilities import deleteallspecialcharacters, deletedomain
 from datetime import datetime
 from entity.info import Info, batchInsertInfo
 from utilities.logger import MyLogger
+from utilities.SMSUtils import MessageSender
+import configparser
+import Constants
 
 first=""
 myLogger = None
@@ -38,10 +41,20 @@ def getFourth(url):
     if currentfirst[:3] == first[:3]:
         myLogger.logger.info("亿房网没有刷新")
         return True
-    else: return False
+    else:
+        send_sms_message("亿房网")
+        return False
 
 def init_yifanglogger():
     global myLogger
     myLogger = MyLogger()
     myLogger.path = myLogger.set_filename(name="yifangcrawler")
     myLogger.configlog()
+
+# 初始化短信发送模块
+def send_sms_message(website_name):
+    config = configparser.ConfigParser()
+    config.read(Constants.ROOT_PATH + "/admin.ini")
+    number1 = config['phone']['crabime']
+    sender = MessageSender(website_name, phone=number1)  # 该sender需要进行手动设置website name
+    sender.send_sms_message()

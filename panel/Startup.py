@@ -124,7 +124,7 @@ class MainFrame(Frame):
         self.newestinfolabel = LabelFrame(rightframe, text='最近五小时房源',borderwidth=5)
         self.newestinfolabel.config(labelanchor=NW)
         self.newestinfolabel.grid(row=1, column=0, rowspan=2)
-        # 这里如何遍历该list对象,然后将它的信息依次显示在label上?
+        # TODO 这里如何遍历该list对象,然后将它的信息依次显示在label上?
         self._newest_data = newest_sources_within_five_hours = getlastthreehoursinfo()
         for index, i in enumerate(newest_sources_within_five_hours):
             # 索引为1的发送,这里只是简单测试

@@ -4,7 +4,7 @@ import configparser
 import Constants
 
 class MessageSender(object):
-    def __init__(self, website, phone):
+    def __init__(self, website, phone=None):
         self.__website = website
         self.__phone = phone
         self.init_key()
