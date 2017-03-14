@@ -21,7 +21,8 @@ third = ""
 index = 0
 stop = False
 myLogger = None
-temporary_count = set()
+temporary_count = list()
+temporary_object = dict()
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))  # 获取当前目录路径
 
 def crawl58(url):
@@ -222,16 +223,31 @@ def send_sms_message(website_name):
     website_name: 哪个网站发现有新消息
     """
     # TODO 如果在半分钟内发现同一个站点发送的短信次数超过三次,则关闭该站点短信提醒并在五小时后进行重新开启短信通道
-    count = 0
     global temporary_count
+    global temporary_object
     config = configparser.ConfigParser()
     config.read(Constants.ROOT_PATH + "/admin.ini")
     number1 = config['phone']['crabime']
     sender = MessageSender(website_name, phone=number1)  # 该sender需要进行手动设置website name
-    sender.send_sms_message()
+
     # 先将所有的website_name放入到一个全局的list中,然后每次调用这个sms_message()方法时做一次判断,如果集合中有该元素,
     # 那么我们需要在另外的一个list中获取到website_name为传入的这个,然后对它进行+1操作
     # 如果发现list集合中没有该对象,那么需要对该对象的current_time属性赋值
+    for name in temporary_count:
+        if name != website_name:
+            t = Temporary(website_name=website_name, current_time=datetime.now())
+            temporary_count.append(website_name)
+            temporary_object[website_name] = t
+            sender.send_sms_message()
+        else:
+            obj = temporary_object[website_name]
+            if obj.send_or_not:
+                obj.addCount()
+                count = obj.count
+                # 如果此时大于3但是duration小于5小时,结果仍然是不发送
+                if count > 3 and currentTime() < obj.get_end_time: obj.send_or_not = False
+                sender.send_sms_message()
+
 
 def main():
     url = "http://wh.58.com/wuchang/ershoufang/h2/?PGTID=0d30000c-0000-1c80-3da0-dc1fb858affb&ClickID=5"

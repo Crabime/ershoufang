@@ -8,8 +8,8 @@ entity/__pycache__/
 panel/__pycache__/
 top/__pycache__/
 top/api/__pycache__/
-top/api/rest/__pycache__/
+top/api/rest/
 utilities/__pycache__/
 test/
-logs/*
 admin.ini
+logs/
