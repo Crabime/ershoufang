@@ -90,9 +90,10 @@ class MainFrame(Frame):
         """取当前数据库中的前三条数据面板上数据进行比对,不同则更新面板"""
 
         result = False
-        data = getlastthreehoursinfo()[0]
-        if data.id != self._newest_data[0].id:
-            result = True
+        data = getlastthreehoursinfo()
+        if len(data) > 0 and len(self._newest_data) > 0:
+            if data[0].id != self._newest_data[0].id:
+                result = True
         return result
 
     def createWidgets(self):
