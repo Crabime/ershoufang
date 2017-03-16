@@ -34,6 +34,7 @@ class MainFrame(Frame):
         self.createright()
         self.bottom_panel()
         self.destroy_after_seconds(3)
+        self.previousId = None
 
     def init_logger(self):
         _myLogger = MyLogger()
@@ -91,8 +92,9 @@ class MainFrame(Frame):
 
         result = False
         data = getlastthreehoursinfo()
-        if len(data) > 0 and len(self._newest_data) > 0:
-            if data[0].id != self._newest_data[0].id:
+        if len(data) > 0:
+            if INDEX == 1 or (INDEX != 1 and data[0].id != self.previousId):
+                self.previousId = data[0].id
                 result = True
         return result
 
@@ -120,12 +122,11 @@ class MainFrame(Frame):
     def createright(self):
         """构建右侧最近三小时房源信息面板"""
 
-        rightframe = Frame(self)
+        self.rightframe = Frame(self)
         self.five_hours_sources = StringVar()
-        self.newestinfolabel = LabelFrame(rightframe, text='最近五小时房源',borderwidth=5)
+        self.newestinfolabel = LabelFrame(self.rightframe, text='最近五小时房源',borderwidth=5)
         self.newestinfolabel.config(labelanchor=NW)
         self.newestinfolabel.grid(row=1, column=0, rowspan=2)
-        # TODO 这里如何遍历该list对象,然后将它的信息依次显示在label上?
         self._newest_data = newest_sources_within_five_hours = getlastthreehoursinfo()
         for index, i in enumerate(newest_sources_within_five_hours):
             # 索引为1的发送,这里只是简单测试
@@ -134,7 +135,21 @@ class MainFrame(Frame):
             label = HyperLinkLabel(self.newestinfolabel, text=i.description, link=get_domain(i)[0])
             self.labels.append(label)
             label.pack()
-        rightframe.grid(row=0, column=0, columnspan=2)
+        self.rightframe.grid(row=0, column=0, columnspan=2)
+        self.rightframe.bind('<Configure>', self.resizeScreen)
+
+    def getParentFrameSize(self):
+        width = super().winfo_reqwidth()
+        height = super().winfo_height()
+        return width, height
+
+    def resizeScreen(self, event):
+        print("rightFrame width", self.rightframe.winfo_height())
+        rightFrameHeight = self.rightframe.winfo_height()
+        if rightFrameHeight > 500:
+            # 让rightframe的中子组件不要控制父组件的大小
+            self.rightframe.pack_propagate(0)
+            self.rightframe.config(height=500)
 
     def bottom_panel(self):
         start = Button(self, text="开始", fg="blue", command=self.startCrawling)
