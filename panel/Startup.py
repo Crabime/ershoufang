@@ -123,8 +123,11 @@ class MainFrame(Frame):
         """构建右侧最近三小时房源信息面板"""
 
         self.rightframe = Frame(self)
+
         self.five_hours_sources = StringVar()
         self.newestinfolabel = LabelFrame(self.rightframe, text='最近五小时房源',borderwidth=5)
+        self.newestinfolabel.config(width=400, height=650)
+        self.newestinfolabel.pack_propagate(False)
         self.newestinfolabel.config(labelanchor=NW)
         self.newestinfolabel.grid(row=1, column=0, rowspan=2)
         self._newest_data = newest_sources_within_five_hours = getlastthreehoursinfo()
@@ -136,20 +139,6 @@ class MainFrame(Frame):
             self.labels.append(label)
             label.pack()
         self.rightframe.grid(row=0, column=0, columnspan=2)
-        self.rightframe.bind('<Configure>', self.resizeScreen)
-
-    def getParentFrameSize(self):
-        width = super().winfo_reqwidth()
-        height = super().winfo_height()
-        return width, height
-
-    def resizeScreen(self, event):
-        print("rightFrame width", self.rightframe.winfo_height())
-        rightFrameHeight = self.rightframe.winfo_height()
-        if rightFrameHeight > 500:
-            # 让rightframe的中子组件不要控制父组件的大小
-            self.rightframe.pack_propagate(0)
-            self.rightframe.config(height=500)
 
     def bottom_panel(self):
         start = Button(self, text="开始", fg="blue", command=self.startCrawling)
@@ -164,9 +153,10 @@ class MainFrame(Frame):
 if __name__ == '__main__':
     INDEX = 0
     root = Tk()
+    root.resizable(width=False, height=False)
     main = MainFrame(root)
     main.master.title('开始')
     # main.master.wm_iconbitmap(bitmap=r'@crawler.xbm')  # 该段代码暂时还起不到作用
-    main.master.minsize(400, 300)
+    root.maxsize(400, 700)
     main.lift()  # 将此窗口设置为模态
     main.mainloop()
