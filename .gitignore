@@ -6,8 +6,7 @@ __pycache__/
 crawler/__pycache__/
 entity/__pycache__/
 panel/__pycache__/
-top/*
+top
 utilities/__pycache__/
-test/
 admin.ini
 logs/

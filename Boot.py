@@ -89,51 +89,57 @@ def crawGanji(url):
         infoList.append(info)
     batchInsertInfo(infoList)
 
+# 搜房网维护后重新开始爬虫
 def crawSouFang(url):
-    myLogger.logger.info("\n\n===========来自搜房网的房源==============")
+    # myLogger.logger.info("\n\n===========来自搜房网的房源==============")
     r = requests.get(url)
     contents = BeautifulSoup(r.content, "html.parser")  # 获取到该网页的地址
-    parent = contents.find("div", class_="build_list")
     # 推广房源
-    commercial = parent.find("div", class_="backColor")
+    commercial = contents.find_all("dl")
+    eligible = list()
+    for i in commercial:
+        children = i.findChildren()
+        if len(children) == 3 and children[0].find("img") is not None:
+            print(children[0])
+            eligible.append(children[0])
     # 所有房源具体信息
-    allCommercialHouses = commercial.find_all("dl")
+    # allCommercialHouses = commercial.find_all("dl")
     # 查找div下直接dl子元素
-    allNonCommercialHouses = parent.find_all("dl", recursive=False)
-    global third
-    infoList = []
+    # allNonCommercialHouses = parent.find_all("dl", recursive=False)
+    # global third
+    # infoList = []
 
     # 将third定义为一个tuple类型,判断它的推广房源以及非推广房源
-    third_one = deleteallspecialcharacters(allCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
-    third_two = deleteallspecialcharacters(allNonCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
-    third = [third_one, third_two]
-    myLogger.logger.info("推广房源数量:" + str(len(allCommercialHouses)) + "个人非推广房源数目:" + str(len(allNonCommercialHouses)))
-    myLogger.logger.info("\t\t=========下面是所有搜房网推广个人房源=============")
-    # 下面时所有的推广的房源
-    for a in allCommercialHouses:
-        basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
-        description = deleteallspecialcharacters(basic.text)
-        # 这里getDomain还未完善
-        url = basic["href"]
-        price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
-        position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
-        myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,位置 :" + position)
-        info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
-        infoList.append(info)
-
-    myLogger.logger.info("\t\t=========下面是所有非推广个人房源=============")
+    # third_one = deleteallspecialcharacters(allCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
+    # third_two = deleteallspecialcharacters(allNonCommercialHouses[0].find("dd", class_="margin_l").find("p", class_="build_name").find("a").text)
+    # third = [third_one, third_two]
+    # myLogger.logger.info("推广房源数量:" + str(len(allCommercialHouses)) + "个人非推广房源数目:" + str(len(allNonCommercialHouses)))
+    # myLogger.logger.info("\t\t=========下面是所有搜房网推广个人房源=============")
+    # # 下面时所有的推广的房源
+    # for a in allCommercialHouses:
+    #     basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
+    #     description = deleteallspecialcharacters(basic.text)
+    #     # 这里getDomain还未完善
+    #     url = basic["href"]
+    #     price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
+    #     position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
+    #     myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,位置 :" + position)
+    #     info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
+    #     infoList.append(info)
+    #
+    # myLogger.logger.info("\t\t=========下面是所有非推广个人房源=============")
     # 下面时所有非推广的个人房源
-    for a in allNonCommercialHouses:
-        basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
-        description = deleteallspecialcharacters(basic.text)
-        position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
-        # 这里getDomain还未完善
-        url = basic["href"]
-        price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
-        myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,location :" + position)
-        info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
-        infoList.append(info)
-    batchInsertInfo(infoList)
+    # for a in allNonCommercialHouses:
+    #     basic = a.find("dd", class_="margin_l").find("p", class_="build_name").find("a")
+    #     description = deleteallspecialcharacters(basic.text)
+    #     position = deleteallspecialcharacters(a.find("dd", class_="margin_l").find("p", class_="finish_data").text)
+    #     # 这里getDomain还未完善
+    #     url = basic["href"]
+    #     price = a.find("dd", class_="right price_r").find("p", class_="build_price").find("span").text
+    #     myLogger.logger.info(description + " , url :" + url + " ,price :" + price + " ,location :" + position)
+    #     info = Info(description=description, url=url, price=price, website_id=3, time=currentTime(), location=position)
+    #     infoList.append(info)
+    # batchInsertInfo(infoList)
 
 # 这里主要是判断58是否有新的房源刷新
 def getFirst(url):
@@ -267,15 +273,15 @@ def main():
                          Website(name="亿房网", concrete_url=yifangurl, domain=getDomain(yifangurl))])
     crawl58(url)
     crawGanji(ganjiurl)
-    crawSouFang(soufangurl)
+    # crawSouFang(soufangurl)
     crawyifang(yifangurl)
     while True and not stop:
         if not getFirst(url):
             crawl58(url)
         if not getSecond(ganjiurl):
             crawGanji(ganjiurl)
-        if not getThird(soufangurl):
-            crawSouFang(soufangurl)
+        # if not getThird(soufangurl):
+        #     crawSouFang(soufangurl)
         if not getFourth(yifangurl):
             crawyifang()
         sleep(random.randrange(2, 5))
