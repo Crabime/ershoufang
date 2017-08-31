@@ -32,7 +32,6 @@ class Info(Base):
     # 房源地点
     location = Column(String(50))
 
-
 class Website(Base):
     __tablename__ = 'website'
     #每个网址对应的id必须唯一

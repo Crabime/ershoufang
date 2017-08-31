@@ -32,9 +32,11 @@ class MainFrame(Frame):
         self._newest_data = []
         self._stop = False
         self.createright()
+        self.newestHouseCountPanel()
         self.bottom_panel()
         self.destroy_after_seconds(3)
         self.previousId = None
+        # self.configure()
 
     def init_logger(self):
         _myLogger = MyLogger()
@@ -140,6 +142,11 @@ class MainFrame(Frame):
             label.pack()
         self.rightframe.grid(row=0, column=0, columnspan=2)
 
+    def newestHouseCountPanel(self):
+        headTitle = Label(self)
+        headTitle.config(text="刷新了多少套新房源")
+        headTitle.grid(row=0, column=2)
+
     def bottom_panel(self):
         start = Button(self, text="开始", fg="blue", command=self.startCrawling)
         start.grid(row=1, column=0)
@@ -157,6 +164,7 @@ if __name__ == '__main__':
     main = MainFrame(root)
     main.master.title('开始')
     # main.master.wm_iconbitmap(bitmap=r'@crawler.xbm')  # 该段代码暂时还起不到作用
-    root.maxsize(400, 700)
+    root.maxsize(500, 700)
+    root.geometry('%dx%d+%d+%d' % (400, 700, 100, 0))
     main.lift()  # 将此窗口设置为模态
     main.mainloop()

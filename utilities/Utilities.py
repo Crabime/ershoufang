@@ -37,7 +37,7 @@ def getsimilarityfactor(url):
         end = url.find("htm")
     else:
         print("传入无效URL")
-        return
+        return ""
     begin = url.rfind("/", 0, end)
     # 例如:/ershoufang/28046460648256x.shtml,那么它的结果应该为"28046460648256x"
     result = url[begin+1:end-1]
