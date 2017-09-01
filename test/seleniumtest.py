@@ -66,7 +66,6 @@ class SeleniumTest(unittest.TestCase):
 
     def testOnlyClickNext(self):
         '''测试只点击下一页'''
-        self.testScrollDownScreen()
         r = Random()
         nextPage = self.driver.find_element_by_class_name("pager").find_element_by_class_name("next")
         action = ActionChains(self.driver)

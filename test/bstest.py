@@ -52,8 +52,11 @@ class BeautifulSoupTest(SeleniumTest):
     def testFindAllScrollItems(self):
         '''一边翻页,一般爬取'''
         self.testFindAllItems()
-        while super(BeautifulSoupTest, self)._checkNextPage():
+        if super(BeautifulSoupTest, self)._checkNextPage():
             self.testOnlyClickNext()
+            # 对翻页的内容进行重新赋值
+            self.__pureHtml = self.driver.page_source
+            self.content = BeautifulSoup(self.__pureHtml, "html.parser")
             print("==============进入下一页=============")
             # todo 为什么这个地方对应的driver拿到的仍然是第一次的那些数据
             self.testFindAllScrollItems()
