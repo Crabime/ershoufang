@@ -152,5 +152,5 @@ class CrawlerFor58(object):
 
 if __name__ == '__main__':
     crawler = CrawlerFor58()
-    crawler.find_all_items_recursively(max_page=3)
+    crawler.find_all_items_recursively(max_page=1)
     crawler.close(simulate_time=3)
